@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Link as RouterLink } from "react-router-dom";
@@ -13,6 +13,7 @@ import { checkingAuthentication, startGoogleAuthentication } from "../../store/a
 export const LoginPage = () => {
     const dispatch = useDispatch();
     const { status, errorMessage } = useSelector((state) => state.auth);
+    const isAuthenticating = useMemo(() => status === "checking", [status]);
 
     const emailInput = useRef(null);
     const { email, password, onInputChange } = useForm(
@@ -84,12 +85,18 @@ export const LoginPage = () => {
 
                 <Grid container spacing={2} sx={{ mb: 2 }}>
                     <Grid item="true" size={{ xs: 12, md: 6 }}>
-                        <Button variant="contained" type="submit" fullWidth onClick={onLogin}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            fullWidth
+                            onClick={onLogin}
+                            disabled={isAuthenticating}
+                        >
                             Login
                         </Button>
                     </Grid>
                     <Grid item="true" size={{ xs: 12, md: 6 }}>
-                        <Button variant="contained" fullWidth onClick={onGoogleLogin}>
+                        <Button variant="contained" fullWidth onClick={onGoogleLogin} disabled={isAuthenticating}>
                             <Google />
                             <Typography sx={{ ml: 1 }}>Google</Typography>
                         </Button>
