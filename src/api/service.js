@@ -20,6 +20,20 @@ export const apiLogin = async (email, password) => {
     }
 };
 
+export const apiRegister = async (email, password, displayName) => {
+    try {
+        const response = await journalApi.post("/auth/register", {
+            email,
+            password,
+            displayName,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("apiRegister", error);
+        return { token: null };
+    }
+};
+
 export const apiLoginGoogle = async (email, password) => {
     try {
         const response = await journalApi.post("/auth/google", {

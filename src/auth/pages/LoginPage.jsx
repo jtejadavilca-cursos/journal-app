@@ -1,28 +1,46 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Google } from "@mui/icons-material";
-import { Button, Link, TextField, Typography } from "@mui/material";
+import { Alert, Button, Link, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 import { AuthLayout } from "../layout/AuthLayout";
 import { useForm } from "../../hooks";
 import { checkingAuthentication, startGoogleAuthentication } from "../../store/auth/thunks";
 
+const formData = {
+    email: "",
+    password: "",
+};
+
+const formValidations = {
+    email: [(value) => value.includes("@"), "Invalid email"],
+    password: [(value) => value.length > 5, "Password must be at least 6 characters"],
+};
+
 export const LoginPage = () => {
     const dispatch = useDispatch();
     const { status, errorMessage } = useSelector((state) => state.auth);
     const isAuthenticating = useMemo(() => status === "checking", [status]);
+    const isAuthenticated = useMemo(() => status === "authenticated", [status]);
+    const navigate = useNavigate();
 
-    const emailInput = useRef(null);
-    const { email, password, onInputChange } = useForm(
-        {
-            email: "",
-            password: "",
-        },
-        emailInput
+    const { email, password, onInputChange, isFormValid, emailValid, passwordValid } = useForm(
+        formData,
+        formValidations
     );
+
+    const [formSubmitted, setFormSubmitted] = useState(false);
+
+    useEffect(() => {
+        console.log("isAuthenticated", isAuthenticated);
+        console.log("status", status);
+        if (isAuthenticated) {
+            navigate("/");
+        }
+    }, [isAuthenticated]);
 
     const login = useCallback(() => {
         dispatch(checkingAuthentication(email, password));
@@ -34,12 +52,14 @@ export const LoginPage = () => {
 
     const onLogin = (e) => {
         e.preventDefault();
-        if (!email || !password) return;
+        setFormSubmitted(true);
+        if (!isFormValid) return;
         login();
     };
 
     const onGoogleLogin = (e) => {
         e.preventDefault();
+        setFormSubmitted(true);
         console.log("onGoogleLogin");
         loginGoogle();
     };
@@ -50,7 +70,6 @@ export const LoginPage = () => {
                 <Grid container>
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
                         <TextField
-                            ref={emailInput}
                             label="Email"
                             type="email"
                             placeholder="user@email.com"
@@ -59,6 +78,8 @@ export const LoginPage = () => {
                             name="email"
                             value={email}
                             onChange={onInputChange}
+                            error={formSubmitted && !!emailValid}
+                            helperText={emailValid}
                         />
                     </Grid>
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
@@ -71,15 +92,18 @@ export const LoginPage = () => {
                             name="password"
                             value={password}
                             onChange={onInputChange}
+                            error={formSubmitted && !!passwordValid}
+                            helperText={passwordValid}
                         />
                     </Grid>
                 </Grid>
 
                 {errorMessage && (
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
-                        <Typography variant="body2" color="error">
+                        {/* <Typography variant="body2" color="error">
                             {errorMessage}
-                        </Typography>
+                        </Typography> */}
+                        <Alert severity="error">{errorMessage}</Alert>
                     </Grid>
                 )}
 

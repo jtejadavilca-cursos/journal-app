@@ -1,5 +1,5 @@
 import { apiLogin, apiLoginGoogle } from "../../api/service";
-import { signInWithGoogle } from "../../firebase/providers";
+import { registerUserWithEmailPassword, signInWithGoogle } from "../../firebase/providers";
 import { checkingCrendentials, login, logout, wrongCredentials } from "./authSlice";
 
 export const checkingAuthentication = (email, password) => {
@@ -9,15 +9,15 @@ export const checkingAuthentication = (email, password) => {
         const { token } = await apiLogin(email, password);
 
         if (token) {
-            return dispatch(login());
+            // get user info from token:
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            console.log("payload", payload);
+
+            localStorage.setItem("token", token);
+
+            return dispatch(login(payload));
         }
 
-        /*dispatch(logout());
-        dispatch(wrongCredentials("Invalid email or password"));
-
-        setTimeout(() => {
-            dispatch(wrongCredentials(null));
-        }, 3000);*/
         handlingWrongCredentials(dispatch, "Invalid email or password");
     };
 };
@@ -33,24 +33,46 @@ export const startGoogleAuthentication = () => {
             return dispatch(login(result));
         }
 
-        console.log("Error", result);
-
-        /*dispatch(logout());
-        dispatch(wrongCredentials(result.error));
-
-        setTimeout(() => {
-            dispatch(wrongCredentials(null));
-        }, 3000);*/
-
-        handlingWrongCredentials(dispatch, result.error);
+        handlingWrongCredentials(dispatch, result.errorMessage);
     };
 };
 
-const handlingWrongCredentials = (dispatch, error) => {
-    dispatch(logout());
-    dispatch(wrongCredentials(error));
+export const startCreatingUserWithEmailPassword = ({ email, password, displayName }) => {
+    return async (dispatch) => {
+        console.log("startCreatingUserWithEmailPassword thunk", email, password, displayName);
+        dispatch(checkingCrendentials());
+
+        const { ok, errorMessage, uid, photoURL, displayName, email } = await registerUserWithEmailPassword(
+            email,
+            password,
+            displayName
+        );
+
+        if (!resp.ok) {
+            return dispatch(login({ uid, photoURL, displayName, email }));
+        }
+
+        handlingWrongCredentials(dispatch, errorMessage);
+    };
+};
+
+const handlingWrongCredentials = (dispatch, errorMessage) => {
+    dispatch(logout({ errorMessage }));
+    dispatch(wrongCredentials(errorMessage));
 
     setTimeout(() => {
         dispatch(wrongCredentials(null));
     }, 5000);
+};
+
+const saveToken = (token) => {
+    localStorage.setItem("token", token);
+};
+
+const getToken = () => {
+    return localStorage.getItem("token");
+};
+
+const removeToken = () => {
+    localStorage.removeItem("token");
 };
