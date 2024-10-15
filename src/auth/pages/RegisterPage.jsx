@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
 import { AuthLayout } from "../layout/AuthLayout";
 import { Button, Link, TextField, Typography, Alert } from "@mui/material";
@@ -25,6 +25,14 @@ export const RegisterPage = () => {
     const dispatch = useDispatch();
     const { status, errorMessage } = useSelector((state) => state.auth);
     const isAuthenticating = useMemo(() => status === "checking", [status]);
+    const isAuthenticated = useMemo(() => status === "authenticated", [status]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/");
+        }
+    }, [isAuthenticated]);
 
     const [formSubmitted, setFormSubmitted] = useState(false);
 

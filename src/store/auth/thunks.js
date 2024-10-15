@@ -1,22 +1,31 @@
 import { apiLogin, apiLoginGoogle } from "../../api/service";
-import { registerUserWithEmailPassword, signInWithGoogle } from "../../firebase/providers";
+import { registerUserWithEmailPassword, signInWithEmailPassword, signInWithGoogle } from "../../firebase/providers";
 import { checkingCrendentials, login, logout, wrongCredentials } from "./authSlice";
 
 export const checkingAuthentication = (email, password) => {
     return async (dispatch) => {
         console.log("checkingAuthentication thunk", email, password);
         dispatch(checkingCrendentials());
-        const { token } = await apiLogin(email, password);
+        //const { token } = await apiLogin(email, password);
 
-        if (token) {
-            // get user info from token:
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            console.log("payload", payload);
+        const result = await signInWithEmailPassword(email, password);
 
-            localStorage.setItem("token", token);
-
-            return dispatch(login(payload));
+        if (result.ok) {
+            if (result.accessToken) {
+                saveToken(result.accessToken);
+            }
+            return dispatch(login(result));
         }
+
+        // if (token) {
+        //     // get user info from token:
+        //     const payload = JSON.parse(atob(token.split(".")[1]));
+        //     console.log("payload", payload);
+
+        //     localStorage.setItem("token", token);
+
+        //     return dispatch(login(payload));
+        // }
 
         handlingWrongCredentials(dispatch, "Invalid email or password");
     };
@@ -30,6 +39,9 @@ export const startGoogleAuthentication = () => {
         const result = await signInWithGoogle();
 
         if (result.ok) {
+            if (result.accessToken) {
+                saveToken(result.accessToken);
+            }
             return dispatch(login(result));
         }
 
@@ -42,13 +54,9 @@ export const startCreatingUserWithEmailPassword = ({ email, password, displayNam
         console.log("startCreatingUserWithEmailPassword thunk", email, password, displayName);
         dispatch(checkingCrendentials());
 
-        const { ok, errorMessage, uid, photoURL, displayName, email } = await registerUserWithEmailPassword(
-            email,
-            password,
-            displayName
-        );
+        const { ok, errorMessage, uid, photoURL } = await registerUserWithEmailPassword(email, password, displayName);
 
-        if (!resp.ok) {
+        if (ok) {
             return dispatch(login({ uid, photoURL, displayName, email }));
         }
 

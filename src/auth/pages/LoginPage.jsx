@@ -35,8 +35,6 @@ export const LoginPage = () => {
     const [formSubmitted, setFormSubmitted] = useState(false);
 
     useEffect(() => {
-        console.log("isAuthenticated", isAuthenticated);
-        console.log("status", status);
         if (isAuthenticated) {
             navigate("/");
         }
