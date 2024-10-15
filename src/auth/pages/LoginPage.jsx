@@ -100,9 +100,6 @@ export const LoginPage = () => {
 
                 {errorMessage && (
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
-                        {/* <Typography variant="body2" color="error">
-                            {errorMessage}
-                        </Typography> */}
                         <Alert severity="error">{errorMessage}</Alert>
                     </Grid>
                 )}
