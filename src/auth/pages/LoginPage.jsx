@@ -8,7 +8,7 @@ import Grid from "@mui/material/Grid2";
 
 import { AuthLayout } from "../layout/AuthLayout";
 import { useForm } from "../../hooks";
-import { checkingAuthentication, startGoogleAuthentication } from "../../store/auth/thunks";
+import { startGoogleAuthentication, startLoginWithEmailPassword } from "../../store/auth/thunks";
 
 const formData = {
     email: "",
@@ -41,7 +41,7 @@ export const LoginPage = () => {
     }, [isAuthenticated]);
 
     const login = useCallback(() => {
-        dispatch(checkingAuthentication(email, password));
+        dispatch(startLoginWithEmailPassword(email, password));
     }, [email, password, dispatch]);
 
     const loginGoogle = useCallback(() => {

@@ -1,31 +1,21 @@
-import { apiLogin, apiLoginGoogle } from "../../api/service";
-import { registerUserWithEmailPassword, signInWithEmailPassword, signInWithGoogle } from "../../firebase/providers";
+import {
+    logoutFirebase,
+    registerUserWithEmailPassword,
+    signInWithEmailPassword,
+    signInWithGoogle,
+} from "../../firebase/providers";
 import { checkingCrendentials, login, logout, wrongCredentials } from "./authSlice";
 
 export const checkingAuthentication = (email, password) => {
     return async (dispatch) => {
         console.log("checkingAuthentication thunk", email, password);
         dispatch(checkingCrendentials());
-        //const { token } = await apiLogin(email, password);
 
         const result = await signInWithEmailPassword(email, password);
 
         if (result.ok) {
-            if (result.accessToken) {
-                saveToken(result.accessToken);
-            }
             return dispatch(login(result));
         }
-
-        // if (token) {
-        //     // get user info from token:
-        //     const payload = JSON.parse(atob(token.split(".")[1]));
-        //     console.log("payload", payload);
-
-        //     localStorage.setItem("token", token);
-
-        //     return dispatch(login(payload));
-        // }
 
         handlingWrongCredentials(dispatch, "Invalid email or password");
     };
@@ -39,9 +29,6 @@ export const startGoogleAuthentication = () => {
         const result = await signInWithGoogle();
 
         if (result.ok) {
-            if (result.accessToken) {
-                saveToken(result.accessToken);
-            }
             return dispatch(login(result));
         }
 
@@ -64,23 +51,38 @@ export const startCreatingUserWithEmailPassword = ({ email, password, displayNam
     };
 };
 
+export const startLoginWithEmailPassword = (email, password) => {
+    return async (dispatch) => {
+        console.log("checkingAuthentication thunk", email, password);
+        dispatch(checkingCrendentials());
+        //const { token } = await apiLogin(email, password);
+
+        const result = await signInWithEmailPassword(email, password);
+
+        if (result.ok) {
+            return dispatch(login(result));
+        }
+
+        handlingWrongCredentials(dispatch, "Invalid email or password");
+    };
+};
+
+export const startLogout = () => {
+    return async (dispatch) => {
+        console.log("startLogout thunk");
+        await logoutFirebase();
+        dispatch(logout());
+    };
+};
+
 const handlingWrongCredentials = (dispatch, errorMessage) => {
+    console.log("handlingWrongCredentials", errorMessage);
     dispatch(logout({ errorMessage }));
+    console.log("after logout");
     dispatch(wrongCredentials(errorMessage));
+    console.log("after wrongCredentials");
 
     setTimeout(() => {
         dispatch(wrongCredentials(null));
     }, 5000);
-};
-
-const saveToken = (token) => {
-    localStorage.setItem("token", token);
-};
-
-const getToken = () => {
-    return localStorage.getItem("token");
-};
-
-const removeToken = () => {
-    localStorage.removeItem("token");
 };

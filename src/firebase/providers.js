@@ -78,3 +78,18 @@ export const registerUserWithEmailPassword = async (email, password, displayName
         };
     }
 };
+
+export const logoutFirebase = async () => {
+    try {
+        await FirebaseAuth.signOut();
+        return {
+            ok: true,
+        };
+    } catch (error) {
+        console.error("logoutFirebase", error);
+        return {
+            ok: false,
+            errorMessage: error.message,
+        };
+    }
+};
