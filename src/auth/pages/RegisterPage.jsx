@@ -63,7 +63,7 @@ export const RegisterPage = () => {
         <AuthLayout title="Register">
             <h1>FormValid - {isFormValid ? "Válido" : "Inválido"}</h1>
 
-            <form onSubmit={onRegister}>
+            <form onSubmit={onRegister} className="animate__animated animate__fadeIn">
                 <Grid container>
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
                         <TextField

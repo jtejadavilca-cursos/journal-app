@@ -64,7 +64,7 @@ export const LoginPage = () => {
 
     return (
         <AuthLayout title={`Login - ${status || (errorMessage ?? "")}`}>
-            <form onSubmit={onLogin}>
+            <form onSubmit={onLogin} className="animate__animated animate__fadeIn">
                 <Grid container>
                     <Grid item="true" size={12} sx={{ mb: 2 }}>
                         <TextField
