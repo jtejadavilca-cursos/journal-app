@@ -9,7 +9,6 @@ export const AppRouter = () => {
     const { status } = useCheckAuth();
 
     if (status === "checking") return <CheckingAuth />;
-    console.log({ status });
     return (
         <Routes>
             {status === "authenticated" ? (
